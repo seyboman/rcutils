@@ -25,6 +25,8 @@ endif()
 
 if(WIN32)
   set(time_impl_c src/time_win32.c)
+elseif(RIOT)
+  set(time_impl_c src/time_riot.c)
 else()
   set(time_impl_c src/time_unix.c)
 endif()
