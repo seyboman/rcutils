@@ -31,12 +31,17 @@ else()
   set(time_impl_c src/time_unix.c)
 endif()
 
+if(RIOT)
+  set(filesystem_impl_c src/filesystem_riot.c)
+else()
+  set(filesystem_impl_c src/filesystem.c)
+endif()
+
 set(rcutils_sources
   src/allocator.c
   src/cmdline_parser.c
   src/concat.c
   src/error_handling.c
-  src/filesystem.c
   src/find.c
   src/format_string.c
   src/get_env.c
@@ -47,6 +52,7 @@ set(rcutils_sources
   src/string_array.c
   src/string_map.c
   ${time_impl_c}
+  ${filesystem_impl_c}
 )
 set_source_files_properties(
   ${rcutils_sources}
