@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -25,7 +25,7 @@ extern "C"
 #include "rcutils/types/rcutils_ret.h"
 
 rcutils_string_array_t
-rcutils_get_zero_initialized_string_array()
+rcutils_get_zero_initialized_string_array(void)
 {
   static rcutils_string_array_t array = {
     .size = 0,
@@ -39,20 +39,20 @@ rcutils_ret_t
 rcutils_string_array_init(
   rcutils_string_array_t * string_array,
   size_t size,
-  rcutils_allocator_t * allocator)
+  const rcutils_allocator_t * allocator)
 {
-  if (!allocator) {
-    RCUTILS_SET_ERROR_MSG("allocator is null", rcutils_get_default_allocator())
+  if (NULL == allocator) {
+    RCUTILS_SET_ERROR_MSG("allocator is null");
     return RCUTILS_RET_INVALID_ARGUMENT;
   }
-  if (!string_array) {
-    RCUTILS_SET_ERROR_MSG("string_array is null", *allocator)
+  if (NULL == string_array) {
+    RCUTILS_SET_ERROR_MSG("string_array is null");
     return RCUTILS_RET_INVALID_ARGUMENT;
   }
   string_array->size = size;
   string_array->data = allocator->zero_allocate(size, sizeof(char *), allocator->state);
-  if (!string_array->data) {
-    RCUTILS_SET_ERROR_MSG("failed to allocator string array", *allocator)
+  if (NULL == string_array->data) {
+    RCUTILS_SET_ERROR_MSG("failed to allocator string array");
     return RCUTILS_RET_BAD_ALLOC;
   }
   string_array->allocator = *allocator;
@@ -62,18 +62,18 @@ rcutils_string_array_init(
 rcutils_ret_t
 rcutils_string_array_fini(rcutils_string_array_t * string_array)
 {
-  if (!string_array) {
-    RCUTILS_SET_ERROR_MSG("string_array is null", rcutils_get_default_allocator())
+  if (NULL == string_array) {
+    RCUTILS_SET_ERROR_MSG("string_array is null");
     return RCUTILS_RET_INVALID_ARGUMENT;
   }
 
-  if (!string_array->data) {
+  if (NULL == string_array->data) {
     return RCUTILS_RET_OK;
   }
 
   rcutils_allocator_t * allocator = &string_array->allocator;
   if (!rcutils_allocator_is_valid(allocator)) {
-    RCUTILS_SET_ERROR_MSG("allocator is invalid", rcutils_get_default_allocator())
+    RCUTILS_SET_ERROR_MSG("allocator is invalid");
     return RCUTILS_RET_INVALID_ARGUMENT;
   }
   size_t i;
@@ -87,6 +87,6 @@ rcutils_string_array_fini(rcutils_string_array_t * string_array)
   return RCUTILS_RET_OK;
 }
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif

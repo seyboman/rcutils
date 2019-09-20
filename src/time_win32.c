@@ -16,7 +16,7 @@
 # error time_win32.c is only intended to be used with win32 based systems
 #endif  // _WIN32
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -32,26 +32,24 @@ extern "C"
 rcutils_ret_t
 rcutils_system_time_now(rcutils_time_point_value_t * now)
 {
-  RCUTILS_CHECK_ARGUMENT_FOR_NULL(
-    now, RCUTILS_RET_INVALID_ARGUMENT, rcutils_get_default_allocator());
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(now, RCUTILS_RET_INVALID_ARGUMENT);
   FILETIME ft;
   GetSystemTimePreciseAsFileTime(&ft);
-  ULARGE_INTEGER uli;
-  uli.LowPart = ft.dwLowDateTime;
-  uli.HighPart = ft.dwHighDateTime;
+  LARGE_INTEGER li;
+  li.LowPart = ft.dwLowDateTime;
+  li.HighPart = ft.dwHighDateTime;
   // Adjust for January 1st, 1970, see:
   //   https://support.microsoft.com/en-us/kb/167296
-  uli.QuadPart -= 116444736000000000;
+  li.QuadPart -= 116444736000000000;
   // Convert to nanoseconds from 100's of nanoseconds.
-  *now = uli.QuadPart * 100;
+  *now = li.QuadPart * 100;
   return RCUTILS_RET_OK;
 }
 
 rcutils_ret_t
 rcutils_steady_time_now(rcutils_time_point_value_t * now)
 {
-  RCUTILS_CHECK_ARGUMENT_FOR_NULL(
-    now, RCUTILS_RET_INVALID_ARGUMENT, rcutils_get_default_allocator());
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(now, RCUTILS_RET_INVALID_ARGUMENT);
   LARGE_INTEGER cpu_frequency, performance_count;
   // These should not ever fail since XP is already end of life:
   // From https://msdn.microsoft.com/en-us/library/windows/desktop/ms644905(v=vs.85).aspx and
@@ -60,12 +58,21 @@ rcutils_steady_time_now(rcutils_time_point_value_t * now)
   //  thus never return zero."
   QueryPerformanceFrequency(&cpu_frequency);
   QueryPerformanceCounter(&performance_count);
-  // Convert to nanoseconds before converting from ticks to avoid precision loss.
-  rcutils_time_point_value_t intermediate = RCUTILS_S_TO_NS(performance_count.QuadPart);
-  *now = intermediate / cpu_frequency.QuadPart;
+  // Calculate nanoseconds and seconds separately because
+  // otherwise overflow can happen in intermediate calculations
+  // This conversion will overflow if the PC runs >292 years non-stop
+  const rcutils_time_point_value_t whole_seconds =
+    performance_count.QuadPart / cpu_frequency.QuadPart;
+  const rcutils_time_point_value_t remainder_count =
+    performance_count.QuadPart % cpu_frequency.QuadPart;
+  const rcutils_time_point_value_t remainder_ns =
+    RCUTILS_S_TO_NS(remainder_count) / cpu_frequency.QuadPart;
+  const rcutils_time_point_value_t total_ns =
+    RCUTILS_S_TO_NS(whole_seconds) + remainder_ns;
+  *now = total_ns;
   return RCUTILS_RET_OK;
 }
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif

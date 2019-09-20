@@ -15,7 +15,7 @@
 #ifndef RCUTILS__TYPES__STRING_MAP_H_
 #define RCUTILS__TYPES__STRING_MAP_H_
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -46,8 +46,8 @@ typedef struct RCUTILS_PUBLIC_TYPE rcutils_string_map_t
  * // rcutils_string_map_fini(&foo); // undefined behavior!
  *
  * // Do this instead:
- * rcutils_string_map_t bar = rcutils_get_zero_initialized_string_array();
- * rcutils_string_array_fini(&bar); // ok
+ * rcutils_string_map_t bar = rcutils_get_zero_initialized_string_map();
+ * rcutils_string_map_fini(&bar); // ok
  * ```
  * */
 RCUTILS_PUBLIC
@@ -432,7 +432,7 @@ rcutils_string_map_copy(
   const rcutils_string_map_t * src_string_map,
   rcutils_string_map_t * dst_string_map);
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

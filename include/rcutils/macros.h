@@ -15,7 +15,7 @@
 #ifndef RCUTILS__MACROS_H_
 #define RCUTILS__MACROS_H_
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -62,8 +62,9 @@ extern "C"
 
 #define RCUTILS_STRINGIFY_IMPL(x) #x
 #define RCUTILS_STRINGIFY(x) RCUTILS_STRINGIFY_IMPL(x)
+#define RCUTILS_UNUSED(x) (void)(x)
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif
 

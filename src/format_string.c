@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -35,7 +35,7 @@ rcutils_format_string_limit(
   const char * format_string,
   ...)
 {
-  if (!format_string) {
+  if (NULL == format_string) {
     return NULL;
   }
   RCUTILS_CHECK_ALLOCATOR(&allocator, return NULL);
@@ -45,28 +45,29 @@ rcutils_format_string_limit(
   va_list args2;
   va_copy(args2, args1);
   // first calculate the output string
-#ifdef _WIN32
-  size_t bytes_to_be_written = _vscprintf(format_string, args1);
-#else
   size_t bytes_to_be_written = rcutils_vsnprintf(NULL, 0, format_string, args1);
-#endif
   va_end(args1);
   // allocate space for the return string
   if (bytes_to_be_written + 1 > limit) {
     bytes_to_be_written = limit - 1;
   }
   char * output_string = allocator.allocate(bytes_to_be_written + 1, allocator.state);
-  if (!output_string) {
+  if (NULL == output_string) {
     va_end(args2);
     return NULL;
   }
-  // formate the string
-  rcutils_vsnprintf(output_string, bytes_to_be_written + 1, format_string, args2);
+  // format the string
+  int ret = rcutils_vsnprintf(output_string, bytes_to_be_written + 1, format_string, args2);
+  if (0 > ret) {
+    allocator.deallocate(output_string, allocator.state);
+    va_end(args2);
+    return NULL;
+  }
   output_string[bytes_to_be_written] = '\0';
   va_end(args2);
   return output_string;
 }
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif

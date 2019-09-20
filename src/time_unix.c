@@ -16,7 +16,7 @@
 # error time_unix.c is not intended to be used with win32 based systems
 #endif  // defined(_WIN32)
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -48,8 +48,7 @@ extern "C"
 rcutils_ret_t
 rcutils_system_time_now(rcutils_time_point_value_t * now)
 {
-  RCUTILS_CHECK_ARGUMENT_FOR_NULL(
-    now, RCUTILS_RET_INVALID_ARGUMENT, rcutils_get_default_allocator());
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(now, RCUTILS_RET_INVALID_ARGUMENT);
   struct timespec timespec_now;
 #if defined(__MACH__)
   // On OS X use clock_get_time.
@@ -65,7 +64,7 @@ rcutils_system_time_now(rcutils_time_point_value_t * now)
   clock_gettime(CLOCK_REALTIME, &timespec_now);
 #endif  // defined(__MACH__)
   if (__WOULD_BE_NEGATIVE(timespec_now.tv_sec, timespec_now.tv_nsec)) {
-    RCUTILS_SET_ERROR_MSG("unexpected negative time", rcutils_get_default_allocator());
+    RCUTILS_SET_ERROR_MSG("unexpected negative time");
     return RCUTILS_RET_ERROR;
   }
   *now = RCUTILS_S_TO_NS((uint64_t)timespec_now.tv_sec) + timespec_now.tv_nsec;
@@ -75,8 +74,7 @@ rcutils_system_time_now(rcutils_time_point_value_t * now)
 rcutils_ret_t
 rcutils_steady_time_now(rcutils_time_point_value_t * now)
 {
-  RCUTILS_CHECK_ARGUMENT_FOR_NULL(
-    now, RCUTILS_RET_INVALID_ARGUMENT, rcutils_get_default_allocator());
+  RCUTILS_CHECK_ARGUMENT_FOR_NULL(now, RCUTILS_RET_INVALID_ARGUMENT);
   // If clock_gettime is available or on OS X, use a timespec.
   struct timespec timespec_now;
 #if defined(__MACH__)
@@ -97,13 +95,13 @@ rcutils_steady_time_now(rcutils_time_point_value_t * now)
 #endif  // defined(CLOCK_MONOTONIC_RAW)
 #endif  // defined(__MACH__)
   if (__WOULD_BE_NEGATIVE(timespec_now.tv_sec, timespec_now.tv_nsec)) {
-    RCUTILS_SET_ERROR_MSG("unexpected negative time", rcutils_get_default_allocator());
+    RCUTILS_SET_ERROR_MSG("unexpected negative time");
     return RCUTILS_RET_ERROR;
   }
   *now = RCUTILS_S_TO_NS((uint64_t)timespec_now.tv_sec) + timespec_now.tv_nsec;
   return RCUTILS_RET_OK;
 }
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif

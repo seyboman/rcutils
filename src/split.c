@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -34,11 +34,11 @@ rcutils_split(
   rcutils_allocator_t allocator,
   rcutils_string_array_t * string_array)
 {
-  if (!string_array) {
-    RCUTILS_SET_ERROR_MSG("string_array is null", allocator)
+  if (NULL == string_array) {
+    RCUTILS_SET_ERROR_MSG("string_array is null");
     return RCUTILS_RET_INVALID_ARGUMENT;
   }
-  if (!str || strlen(str) == 0) {
+  if (NULL == str || strlen(str) == 0) {
     *string_array = rcutils_get_zero_initialized_string_array();
     return RCUTILS_RET_OK;
   }
@@ -66,7 +66,7 @@ rcutils_split(
   }
   // TODO(wjwwood): refactor this function so it can use rcutils_string_array_init() instead
   string_array->data = allocator.allocate(string_array->size * sizeof(char *), allocator.state);
-  if (!string_array->data) {
+  if (NULL == string_array->data) {
     goto fail;
   }
 
@@ -85,7 +85,7 @@ rcutils_split(
         // and nullterminating
         string_array->data[token_counter] =
           allocator.allocate((rhs - lhs + 2) * sizeof(char), allocator.state);
-        if (!string_array->data[token_counter]) {
+        if (NULL == string_array->data[token_counter]) {
           string_array->size = token_counter;
           goto fail;
         }
@@ -113,12 +113,12 @@ rcutils_split(
 fail:
   if (rcutils_string_array_fini(string_array) != RCUTILS_RET_OK) {
     RCUTILS_SAFE_FWRITE_TO_STDERR("failed to finalize string array during error handling: ");
-    RCUTILS_SAFE_FWRITE_TO_STDERR(rcutils_get_error_string_safe());
+    RCUTILS_SAFE_FWRITE_TO_STDERR(rcutils_get_error_string().str);
     RCUTILS_SAFE_FWRITE_TO_STDERR("\n");
     rcutils_reset_error();
   }
 
-  RCUTILS_SET_ERROR_MSG("unable to allocate memory for string array data", allocator);
+  RCUTILS_SET_ERROR_MSG("unable to allocate memory for string array data");
   return RCUTILS_RET_ERROR;
 }
 
@@ -129,7 +129,7 @@ rcutils_split_last(
   rcutils_allocator_t allocator,
   rcutils_string_array_t * string_array)
 {
-  if (!str || strlen(str) == 0) {
+  if (NULL == str || strlen(str) == 0) {
     *string_array = rcutils_get_zero_initialized_string_array();
     return RCUTILS_RET_OK;
   }
@@ -164,7 +164,7 @@ rcutils_split_last(
     }
     string_array->data[0] =
       allocator.allocate((found_last - lhs_offset + 2) * sizeof(char), allocator.state);
-    if (!string_array->data) {
+    if (NULL == string_array->data[0]) {
       result_error = RCUTILS_RET_BAD_ALLOC;
       goto fail;
     }
@@ -185,7 +185,7 @@ rcutils_split_last(
     string_array->data[0] = allocator.allocate(
       (found_last + 1 - lhs_offset - inner_rhs_offset + 1) * sizeof(char),
       allocator.state);
-    if (!string_array->data[0]) {
+    if (NULL == string_array->data[0]) {
       result_error = RCUTILS_RET_BAD_ALLOC;
       goto fail;
     }
@@ -195,7 +195,7 @@ rcutils_split_last(
     string_array->data[1] = allocator.allocate(
       (string_size - found_last - rhs_offset + 1) * sizeof(char),
       allocator.state);
-    if (!string_array->data[1]) {
+    if (NULL == string_array->data[1]) {
       result_error = RCUTILS_RET_BAD_ALLOC;
       goto fail;
     }
@@ -208,11 +208,11 @@ rcutils_split_last(
 fail:
   if (rcutils_string_array_fini(string_array) != RCUTILS_RET_OK) {
     RCUTILS_LOG_ERROR(
-      "failed to clean up on error (leaking memory): '%s'", rcutils_get_error_string_safe());
+      "failed to clean up on error (leaking memory): '%s'", rcutils_get_error_string().str);
   }
   return result_error;
 }
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif

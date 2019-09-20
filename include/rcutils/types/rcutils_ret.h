@@ -15,7 +15,7 @@
 #ifndef RCUTILS__TYPES__RCUTILS_RET_H_
 #define RCUTILS__TYPES__RCUTILS_RET_H_
 
-#if __cplusplus
+#ifdef __cplusplus
 extern "C"
 {
 #endif
@@ -31,6 +31,10 @@ typedef int rcutils_ret_t;
 #define RCUTILS_RET_INVALID_ARGUMENT 11
 /// Not enough storage to do operation.
 #define RCUTILS_RET_NOT_ENOUGH_SPACE 12
+/// Resource is not initialized
+#define RCUTILS_RET_NOT_INITIALIZED 13
+/// Resource for request not found
+#define RCUTILS_RET_NOT_FOUND 14
 
 /// Given string map was either already initialized or was not zero initialized.
 #define RCUTILS_RET_STRING_MAP_ALREADY_INIT 30
@@ -41,8 +45,14 @@ typedef int rcutils_ret_t;
 
 /// Internal severity map for logger thresholds is invalid.
 #define RCUTILS_RET_LOGGING_SEVERITY_MAP_INVALID 40
+/// String representation of a severity is invalid.
+#define RCUTILS_RET_LOGGING_SEVERITY_STRING_INVALID 41
 
-#if __cplusplus
+/// There are no more entires beyond the last one in the map
+#define RCUTILS_RET_HASH_MAP_NO_MORE_ENTRIES 50
+
+
+#ifdef __cplusplus
 }
 #endif
 
