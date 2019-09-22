@@ -67,7 +67,7 @@ rcutils_is_readable_and_writable(const char * abs_path)
 }
 
 char *
-rcutils_join_path(const char * left_hand_path, const char * right_hand_path)
+rcutils_join_path(const char * left_hand_path, const char * right_hand_path, rcutils_allocator_t allocator)
 {
   return NULL;
 }
